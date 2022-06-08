@@ -10,7 +10,7 @@
   height: {pageHeight}px !important;
 }
 
-#chrome-extension__blipshot-a {
+#chrome-extension__blipshot-div {
   z-index: 66666666667 !important;
   position: absolute !important;
   top: 0 !important;
@@ -21,9 +21,13 @@
   transition: all 200ms ease-in-out !important;
 }
 
-#chrome-extension__blipshot-a:hover {
+#chrome-extension__blipshot-div:hover {
   transform: translate3d(0, 0, 2px) !important;
   box-shadow: 0px 7px 10px #000000, 0 0 0 2px #000000 !important;
+}
+
+#chrome-extension__blipshot-div div button {
+  margin: 5px 4px 5px 4px;
 }
 
 #chrome-extension__blipshot-img {
@@ -32,8 +36,61 @@
 }
 </style>
 
+<link rel="stylesheet" href="{runtimeUrlPrefix}js-crop.css" />
+
 <div id="chrome-extension__blipshot-dim"> </div>
 
-<a id="chrome-extension__blipshot-a" download="{filename}" href="{blobURL}">
-  <img id="chrome-extension__blipshot-img" alt="{filename}" src="{blobURL}" />
-</a>
+<div id="chrome-extension__blipshot-div">
+  <a id="chrome-extension__blipshot-a" download="{filename}" href="{blobURL}">
+    <img id="chrome-extension__blipshot-img" alt="{filename}" src="{blobURL}" />
+  </a>
+  <div>
+    <button id="crop-button">Crop</button>
+    <button id="download-cropped-button">Download Cropped</button>
+    <button id="copy-cropped-button">Copy Cropped</button>
+  </div>
+</div>
+
+<script src="{runtimeUrlPrefix}js-crop.js"></script>
+
+<script>
+  let cropButton = document.getElementById("crop-button");
+  let downloadCroppedButton = document.getElementById("download-cropped-button");
+  let copyCroppedButton = document.getElementById("copy-cropped-button");
+
+  [downloadCroppedButton, copyCroppedButton].forEach(x => x.style.display = "none");
+
+  cropButton.addEventListener("click", function () {
+    document.getElementById("chrome-extension__blipshot-a").removeAttribute("href");
+    let cropper = null;
+    let croppedCanvas = document.createElement("canvas");
+    let imageToCrop = document.getElementById("chrome-extension__blipshot-img");
+
+    cropButton.style.display = "none";
+    [downloadCroppedButton, copyCroppedButton].forEach(x => x.style.display = "inline");
+
+    cropper = jsCrop.initialise(imageToCrop, { "outputCanvas": croppedCanvas, "startInCropMode": true });
+
+    downloadCroppedButton.addEventListener("click", function () {
+      if (cropper) {
+        cropper.downloadCroppedImage();
+      }
+    });
+
+    copyCroppedButton.addEventListener("click", function () {
+      if (cropper) {
+        cropper.drawCroppedImage();
+        croppedCanvas.toBlob(function (blob) {
+          navigator.clipboard.write([new ClipboardItem({ "image/png": blob })]);
+        });
+      }
+    });
+    
+    window.addEventListener("unload", function () {
+      cropButton = null;
+      imageToCrop = null;
+      cropper = null;
+    });
+  });
+
+</script>

@@ -159,6 +159,9 @@
      * Loads the template and rendes it on the DOM.
      */
     var name = name || "template";
+    data = Object.assign({
+      "runtimeUrlPrefix": chrome.runtime.getURL("resources/"),
+    }, data);
 
     if (!templates[name]) {
       // Load, cache and use
@@ -188,6 +191,14 @@
     var div = window.document.createElement('div');
     div.innerHTML = templatePrepared;
     window.document.body.appendChild(div);
+
+    Array.from(div.querySelectorAll("script")).forEach( oldScript => {
+      const newScript = document.createElement("script");
+      Array.from(oldScript.attributes)
+        .forEach( attr => newScript.setAttribute(attr.name, attr.value) );
+      newScript.appendChild(document.createTextNode(oldScript.innerHTML));
+      oldScript.parentNode.replaceChild(newScript, oldScript);
+    });
 
     callback(div);
   }

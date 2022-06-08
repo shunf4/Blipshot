@@ -34,6 +34,8 @@
     "<all_urls>"
   ],
   "web_accessible_resources": [
-    "resources/overlay.html"
+    "resources/overlay.html",
+    "resources/js-crop.css",
+    "resources/js-crop.js"
   ]
 }
