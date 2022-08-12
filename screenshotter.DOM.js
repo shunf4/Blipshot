@@ -36,12 +36,16 @@
   var shared = {};
   var templates = {};
 
-  const SCROLL_DELAY = 500; // The delay is due to: https://github.com/folletto/Blipshot/issues/25
+  const SCROLL_DELAY = 1000; // The delay is due to: https://github.com/folletto/Blipshot/issues/25
+
+  var shouldStop = false;
 
   // ****************************************************************************************** SCREENSHOT SEQUENCE
 
   // 1
   function screenshotBegin(shared) {
+    shouldStop = false;
+
     // Identify which part of the DOM is "scrolling", and store the previous position
     var scrollNode = document.scrollingElement || document.documentElement;
 
@@ -67,7 +71,7 @@
     // Scroll down!
     scrollNode.scrollTop += window.innerHeight;
 
-    if (scrollNode.scrollTop == scrollTopBeforeScrolling || scrollNode.scrollTop > 32766) { // 32766 --> Skia / Chrome Canvas Limitation, see recursiveImageMerge()
+    if (shouldStop || scrollNode.scrollTop == scrollTopBeforeScrolling || scrollNode.scrollTop > 32766) { // 32766 --> Skia / Chrome Canvas Limitation, see recursiveImageMerge()
       // END ||
       shared.imageDirtyCutAt = scrollTopBeforeScrolling % window.innerHeight;
       // scrollNode.scrollTop = shared.originalScrollTop; // <-[] restore user scrollTop <-[] DON'T !
@@ -138,6 +142,7 @@
           case "screenshotBegin": screenshotBegin(request.shared); break;
           case "screenshotScroll": screenshotScroll(request.shared); break;
           case "screenshotReturn": screenshotReturn(request.shared); break;
+          case "screenshotStop": shouldStop = true; break;
         }
 
         sendResponse(true); // this can be checked to verify if the script is loaded (heartbeat)
