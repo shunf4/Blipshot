@@ -70,7 +70,8 @@
     if (scrollNode.scrollTop == scrollTopBeforeScrolling || scrollNode.scrollTop > 32766) { // 32766 --> Skia / Chrome Canvas Limitation, see recursiveImageMerge()
       // END ||
       shared.imageDirtyCutAt = scrollTopBeforeScrolling % window.innerHeight;
-      scrollNode.scrollTop = shared.originalScrollTop; // <-[] restore user scrollTop
+      // scrollNode.scrollTop = shared.originalScrollTop; // <-[] restore user scrollTop <-[] DON'T !
+      scrollNode.scrollTop = 0; // <-[] restore scrollTop to TOP
       screenshotEnd(shared);
     } else {
       // LOOP >>

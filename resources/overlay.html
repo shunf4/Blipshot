@@ -1,5 +1,6 @@
 <style>
 #chrome-extension__blipshot-dim {
+  all: revert;
   z-index: 66666666666 !important;
   position: absolute !important;
   width: 100% !important;
@@ -10,7 +11,12 @@
   height: {pageHeight}px !important;
 }
 
+#chrome-extension__blipshot-dim a,div,button,img {
+  all: revert;
+}
+
 #chrome-extension__blipshot-div {
+  all: revert;
   z-index: 66666666667 !important;
   position: absolute !important;
   top: 0 !important;
@@ -19,6 +25,10 @@
   margin: 20px !important;
   background: #ffffff !important;
   transition: all 200ms ease-in-out !important;
+}
+
+#chrome-extension__blipshot-div a,div,button,img {
+  all: revert;
 }
 
 #chrome-extension__blipshot-div:hover {
@@ -54,6 +64,7 @@
 <script src="{runtimeUrlPrefix}js-crop.js"></script>
 
 <script>
+(function() {
   let cropButton = document.getElementById("crop-button");
   let downloadCroppedButton = document.getElementById("download-cropped-button");
   let copyCroppedButton = document.getElementById("copy-cropped-button");
@@ -85,12 +96,14 @@
         });
       }
     });
-    
-    window.addEventListener("unload", function () {
-      cropButton = null;
-      imageToCrop = null;
-      cropper = null;
-    });
+
   });
+
+  window.addEventListener("unload", function () {
+    cropButton = null;
+    imageToCrop = null;
+    cropper = null;
+  });
+})();
 
 </script>
