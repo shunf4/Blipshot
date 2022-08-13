@@ -101,7 +101,7 @@
       renderTemplate("overlay", {
         blobURL: blobURL,
         filename: filename,
-        pageHeight: window.document.body.scrollHeight,
+        pageHeight: (window.document.scrollingElement || window.document.documentElement || { scrollHeight: 2000 }).scrollHeight,
       }, function(div) {
         // ****** Add Event Listeners
         function actionRemoveDiv() {
