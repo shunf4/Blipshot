@@ -94,12 +94,16 @@ var Screenshotter = {
         });
 
         // ****** Begin!
-        chrome.tabs.sendMessage(self.shared.tab.id, { action: 'blanketStyleSet', property: 'position', from: 'fixed', to: 'absolute' });
-        chrome.tabs.sendMessage(self.shared.tab.id, { action: 'blanketStyleSet', property: 'position', from: 'sticky', to: 'relative' });
-        self.screenshotBegin(self.shared);
+        self.askFixedElemHandling(self.shared, positionSetFromAndTos => {
+          chrome.tabs.sendMessage(self.shared.tab.id, { action: 'blanketStyleSet', property: 'position', fromAndTos: positionSetFromAndTos });
+          self.screenshotBegin(self.shared);
+        });
       });
     });
   },
+
+  // 0.5
+  askFixedElemHandling: function(shared, callback) { chrome.tabs.sendMessage(this.shared.tab.id, { action: 'askFixedElemHandling', shared: shared }, callback); },
 
   // 1
   screenshotBegin: function(shared) { chrome.tabs.sendMessage(this.shared.tab.id, { action: 'screenshotBegin', shared: shared }); },

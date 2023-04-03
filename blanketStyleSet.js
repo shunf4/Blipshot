@@ -39,9 +39,9 @@
  *      { "js": [ "blanketStyleSet.js" ], "matches": [ "<all_urls>" ], "run_at": "document_end" }
  *    ],
  *
- *  Call its functions using:
+ *  Call its functions using (only call _once_ for one property; if multiple conversions is to be done for one property, call _once_ with multiple pairs in `fromAndTos`):
  *
- *    chrome.tabs.sendMessage(this.shared.tab.id, { action: 'blanketStyleSet', property: 'position', from: "fixed", to: 'absolute' });
+ *    chrome.tabs.sendMessage(this.shared.tab.id, { action: 'blanketStyleSet', property: 'position', fromAndTos: [["fixed", 'absolute'], ['aaa', 'bbb']] });
  *
  *  Restore by calling:
  *
@@ -61,14 +61,14 @@
      */
     chrome.extension.onMessage.addListener(function(e) {
         switch (e.action) {
-          case "blanketStyleSet": blanketStyleSet(e.property, e.from, e.to); break;
+          case "blanketStyleSet": blanketStyleSet(e.property, e.fromAndTos); break;
           case "blanketStyleRestore": blanketStyleRestore(e.property); break;
         }
     });
   }
   eventManagerInit(); // Init
 
-  function blanketStyleSet(property, from, to) {
+  function blanketStyleSet(property, fromAndTos) {
     /****************************************************************************************************
      * Convert a CSS property value to a specific value for every DOM node
      * From a function by @guille
@@ -89,20 +89,22 @@
     for (var i = 0, l = els.length; i < l; i++) {
       el = els[i];
 
-      if (from == el.style[property]) {
-        // *** Check for node style:
-        el.style[property] = to;
-        reverse[property].push(function() {
-          this.style[property] = from;
-        }.bind(el));
-      } else {
-        // *** Check for computed style:
-        styles = getComputedStyle(el);
-        if (from == styles.getPropertyValue(property)) {
+      for (let [from, to] of fromAndTos) {
+        if (from == el.style[property]) {
+          // *** Check for node style:
           el.style[property] = to;
-          reverse[property].push(function(){
+          reverse[property].push(function() {
             this.style[property] = from;
           }.bind(el));
+        } else {
+          // *** Check for computed style:
+          styles = getComputedStyle(el);
+          if (from == styles.getPropertyValue(property)) {
+            el.style[property] = to;
+            reverse[property].push(function(){
+              this.style[property] = from;
+            }.bind(el));
+          }
         }
       }
     }

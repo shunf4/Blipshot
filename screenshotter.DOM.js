@@ -42,6 +42,27 @@
 
   // ****************************************************************************************** SCREENSHOT SEQUENCE
 
+  // 0.5
+  function askFixedElemHandling(shared) {
+    if (window.confirm("Leave position:fixed elements to where they were or absolutify them directly?")) {
+      [...document.body.getElementsByTagName("*")].filter(
+        x => getComputedStyle(x, null).getPropertyValue("position") === "fixed"
+      ).forEach(x => {
+        let rect = x.getBoundingClientRect();
+        if (rect.top === 0) {
+          // absolutify
+          x.style.top = rect.top + window.scrollY + 'px';
+          x.style.left = rect.left + window.scrollX + 'px';
+          x.style.position = 'absolute';
+        } else {
+          x.remove();
+        }
+      });
+      return [['sticky', 'relative']];
+    }
+    return [['fixed', 'absolute'], ['sticky', 'relative']];
+  }
+
   // 1
   function screenshotBegin(shared) {
     shouldStop = false;
@@ -55,7 +76,7 @@
 
     shared.originalScrollTop = scrollNode.scrollTop; // ->[] save user scrollTop
     shared.tab.hasVscrollbar = (window.innerHeight < scrollNode.scrollHeight);
-    scrollNode.scrollTop = 0;
+    // scrollNode.scrollTop = 0;
     setTimeout(function() { screenshotVisibleArea(shared); }, 100);
   }
 
@@ -138,14 +159,16 @@
      */
     var self = this;
     chrome.extension.onMessage.addListener(function(request, sender, sendResponse) {
+        let response = true;
         switch (request.action) {
+          case "askFixedElemHandling": response = askFixedElemHandling(request.shared); break;
           case "screenshotBegin": screenshotBegin(request.shared); break;
           case "screenshotScroll": screenshotScroll(request.shared); break;
           case "screenshotReturn": screenshotReturn(request.shared); break;
           case "screenshotStop": shouldStop = true; break;
         }
 
-        sendResponse(true); // this can be checked to verify if the script is loaded (heartbeat)
+        sendResponse(response); // this can be checked to verify if the script is loaded (heartbeat)
     });
   }
   eventManagerInit(); // Init
