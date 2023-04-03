@@ -92,17 +92,19 @@
       for (let [from, to] of fromAndTos) {
         if (from == el.style[property]) {
           // *** Check for node style:
-          el.style[property] = to;
+          el.style.setProperty(property, to, 'important');
           reverse[property].push(function() {
-            this.style[property] = from;
+            this.style.removeProperty(property);
+            this.style.setProperty(property, from);
           }.bind(el));
         } else {
           // *** Check for computed style:
           styles = getComputedStyle(el);
           if (from == styles.getPropertyValue(property)) {
-            el.style[property] = to;
+            el.style.setProperty(property, to, 'important');
             reverse[property].push(function(){
-              this.style[property] = from;
+              this.style.removeProperty(property);
+              this.style.setProperty(property, from);
             }.bind(el));
           }
         }

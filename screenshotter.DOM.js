@@ -44,16 +44,16 @@
 
   // 0.5
   function askFixedElemHandling(shared) {
-    if (window.confirm("Leave position:fixed elements to where they were or absolutify them directly?")) {
+    if (window.confirm("Leave position:fixed elements to where they were or absolutify them directly? (If yes, after screenshot the elements are not restored to initial state.)")) {
       [...document.body.getElementsByTagName("*")].filter(
         x => getComputedStyle(x, null).getPropertyValue("position") === "fixed"
       ).forEach(x => {
         let rect = x.getBoundingClientRect();
         if (rect.top === 0) {
           // absolutify
-          x.style.top = rect.top + window.scrollY + 'px';
-          x.style.left = rect.left + window.scrollX + 'px';
-          x.style.position = 'absolute';
+          x.style.setProperty('top', rect.top + window.scrollY + 'px', 'important');
+          x.style.setProperty('left', rect.left + window.scrollX + 'px', 'important');
+          x.style.setProperty('position', 'absolute', 'important');
         } else {
           x.remove();
         }
@@ -77,7 +77,7 @@
     shared.originalScrollTop = scrollNode.scrollTop; // ->[] save user scrollTop
     shared.tab.hasVscrollbar = (window.innerHeight < scrollNode.scrollHeight);
     // scrollNode.scrollTop = 0;
-    setTimeout(function() { screenshotVisibleArea(shared); }, 100);
+    setTimeout(function() { screenshotVisibleArea(shared); }, 500);
   }
 
   // 2
