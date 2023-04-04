@@ -44,21 +44,32 @@
 
   // 0.5
   function askFixedElemHandling(shared) {
-    if (window.confirm("Leave position:fixed elements to where they were or absolutify them directly? (If yes, after screenshot the elements are not restored to initial state.)")) {
+    if (window.confirm("Leave position:fixed and position:sticky elements to where they were or absolutify them directly? (If yes, after screenshot the elements are not restored to initial state.)")) {
       [...document.body.getElementsByTagName("*")].filter(
-        x => getComputedStyle(x, null).getPropertyValue("position") === "fixed"
+        x => {
+          let positionStyleValue = getComputedStyle(x, null).getPropertyValue("position");
+          if (positionStyleValue === "fixed" || positionStyleValue == "sticky") {
+            x["__computed_position"] = positionStyleValue;
+            return true;
+          }
+          return false;
+        }
       ).forEach(x => {
         let rect = x.getBoundingClientRect();
         if (rect.top === 0) {
           // absolutify
           x.style.setProperty('top', rect.top + window.scrollY + 'px', 'important');
           x.style.setProperty('left', rect.left + window.scrollX + 'px', 'important');
+          x.style.setProperty('width', rect.width + 'px', 'important');
+          x.style.setProperty('height', rect.height + 'px', 'important');
           x.style.setProperty('position', 'absolute', 'important');
+          // Prevent superfluous scrollbar
+          x.style.setProperty('overflow', 'hidden', 'important');
         } else {
           x.remove();
         }
       });
-      return [['sticky', 'relative']];
+      return [];
     }
     return [['fixed', 'absolute'], ['sticky', 'relative']];
   }
